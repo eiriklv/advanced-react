@@ -1,8 +1,6 @@
 import React from 'react'
 import { render } from 'react-dom'
 import { Router, Route, IndexRoute, Link } from 'react-router'
-import async from 'async'
-import equals from 'equals'
 import getJSON from './lib/getJSON'
 
 class Main extends React.Component {
