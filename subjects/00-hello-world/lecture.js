@@ -1,6 +1,6 @@
-import React from 'react/addons'
+import React from 'react'
 import { render } from 'react-dom'
-let { PureRenderMixin } = React.addons;
+import PureRenderMixin from 'react-addons-pure-render-mixin'
 
 //var CreateClass = React.createClass({
 
