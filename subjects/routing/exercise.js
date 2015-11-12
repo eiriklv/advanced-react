@@ -1,89 +1,81 @@
+////////////////////////////////////////////////////////////////////////////////
+// Exercise:
+//
+// - Add routes for "/form" that renders `Form` and "/confirm" that renders
+//   `Confirm`
+// - Add links to "/form" and "/confirm" to the `App`
+// - When the form is submitted, transition to `/confirm` with the form data
+//   as location state, you can get the values with `serializeForm(<form node>)`
+// - display the contents of `this.props.location.state` in `Confirm`
+// - if there is no location state, say something else
+// - click the "some page" link, and then click the back button
+
 import React from 'react'
 import { render } from 'react-dom'
 import { Router, Route, IndexRoute, Link } from 'react-router'
-import getJSON from './lib/getJSON'
-import { asyncProps } from './lib/AsyncProps'
+import serializeForm from 'form-serialize'
 
-class Main extends React.Component {
-  render() {
-    return (
-      <div>
-        <h1>AsyncProps</h1>
-        {this.props.children}
-      </div>
-    )
-  }
-}
-
-class Index extends React.Component {
+const App = React.createClass({
   render() {
     return (
       <div>
         <ul>
-          <li><Link to="/contacts">Contacts</Link></li>
+          <li>{/* add a link to "/form" here */}</li>
+          <li>{/* add a link to "/confirm" here */}</li>
         </ul>
-      </div>
-    )
-  }
-}
-
-
-class Contacts extends React.Component {
-  render() {
-    return (
-      <div>
-        <h2>Contacts</h2>
         {this.props.children}
       </div>
     )
   }
-}
+})
 
-class ContactsIndex extends React.Component {
-
-  static loadProps(params, cb) {
-    getJSON('https://addressbook-api.herokuapp.com/contacts', cb)
-  }
-
+const Index = React.createClass({
   render() {
     return (
       <div>
-        <ul>
-          {this.props.contacts.map((contact) => (
-            <li key={contact.id}><Link to={`/contacts/${contact.id}`}>{contact.first}</Link></li>
-          ))}
-        </ul>
+        <h1>Its like a clientside post</h1>
       </div>
     )
   }
-}
+})
 
-class Contact extends React.Component {
-
-  static loadProps(params, cb) {
-    getJSON(`https://addressbook-api.herokuapp.com/contacts/${params.contactId}`, cb)
-  }
-
+const Form = React.createClass({
   render() {
-    let { first, last } = this.props.contact
+    return (
+      <form>
+        <p>
+          <label>Favorite Food</label>{' '}
+          <input type="text" name="favoriteFood" defaultValue="Tacos"/>
+        </p>
+        <p>
+          <label>Favorite Drink</label>{' '}
+          <input type="text" name="favoriteDrink" defaultValue="Horchata"/>
+        </p>
+        <p>
+          <button type="submit">Submit</button>
+        </p>
+      </form>
+    )
+  }
+})
+
+const Confirm = React.createClass({
+  render() {
     return (
       <div>
-        <h3>{first} {last}</h3>
+        <h1>Confirm</h1>
+        <p>Show the data on location state here.</p>
       </div>
     )
   }
-}
+})
 
 render((
-  <Router createElement={asyncProps}>
-    <Route path="/" component={Main}>
+  <Router>
+    <Route path="/" component={App}>
       <IndexRoute component={Index}/>
-      <Route path="contacts" component={Contacts}>
-        <IndexRoute component={ContactsIndex}/>
-        <Route path=":contactId" component={Contact}/>
-      </Route>
+      {/* more routes here */}
     </Route>
   </Router>
 ), document.getElementById('app'))
-
 

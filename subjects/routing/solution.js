@@ -1,111 +1,96 @@
+////////////////////////////////////////////////////////////////////////////////
+// Exercise:
+//
+// - Add routes for "/form" that renders `Form` and "/confirm" that renders
+//   `Confirm`
+// - When the form is submitted, transition to `/confirm` with the form data
+//   as location state, you can get the values with `serializeForm(<form node>)`
+// - display the contents of `this.props.location.state` in `Confirm`
+// - if there is no location state, say something else
+// - click the "some page" link, and then click the back button
+
 import React from 'react'
 import { render } from 'react-dom'
 import { Router, Route, IndexRoute, Link } from 'react-router'
-import getJSON from './lib/getJSON'
-import { asyncProps } from './lib/AsyncProps'
+import serializeForm from 'form-serialize'
 
-class Main extends React.Component {
+const App = React.createClass({
   render() {
     return (
       <div>
-        <h1>AsyncProps</h1>
+        <ul>
+          <li><Link to="/form">Go to the form</Link></li>
+          <li><Link to="/confirm">Confirm</Link></li>
+        </ul>
         {this.props.children}
       </div>
     )
   }
-}
+})
 
-class Index extends React.Component {
+const Index = React.createClass({
   render() {
     return (
       <div>
-        <ul>
-          <li><Link to="/contacts">Contacts</Link></li>
-          <li><Link to="/star-wars">Star Wars</Link></li>
-        </ul>
+        <h1>Its like a clientside post</h1>
       </div>
     )
   }
-}
+})
 
-
-class Contacts extends React.Component {
-  render() {
-    return (
-      <div>
-        <h2>Contacts</h2>
-        {this.props.children}
-      </div>
-    )
-  }
-}
-
-class ContactsIndex extends React.Component {
-
-  static loadProps(params, cb) {
-    getJSON('https://addressbook-api.herokuapp.com/contacts', cb)
-  }
+const Form = React.createClass({
+  handleSubmit(event) {
+    event.preventDefault()
+    const formData = serializeForm(event.target, { hash: true })
+    this.props.history.pushState(formData, '/confirm')
+  },
 
   render() {
     return (
-      <div>
-        <ul>
-          {this.props.contacts.map((contact) => (
-            <li key={contact.id}><Link to={`/contacts/${contact.id}`}>{contact.first}</Link></li>
-          ))}
-        </ul>
-      </div>
+      <form onSubmit={this.handleSubmit}>
+        <p>
+          <label>Favorite Food</label>{' '}
+          <input type="text" name="favoriteFood" defaultValue="Tacos"/>
+        </p>
+        <p>
+          <label>Favorite Drink</label>{' '}
+          <input type="text" name="favoriteDrink" defaultValue="Horchata"/>
+        </p>
+        <p>
+          <button type="submit">Submit</button>
+        </p>
+      </form>
     )
   }
-}
+})
 
-class Contact extends React.Component {
-
-  static loadProps(params, cb) {
-    getJSON(`https://addressbook-api.herokuapp.com/contacts/${params.contactId}`, cb)
-  }
-
-  render() {
-    let { first, last } = this.props.contact
-    return (
-      <div>
-        <h3>{first} {last}</h3>
-      </div>
-    )
-  }
-}
-
-class StarWars extends React.Component {
-
-  static loadProps(params, cb) {
-    getJSON(`http://swapi.co/api/people/`, (err, res) => {
-      cb(err, { people: res.results })
-    })
-  }
-
+const Confirm = React.createClass({
   render() {
     return (
       <div>
-        <h3>Star Wars People</h3>
-        <ul>
-          {this.props.people.map((person) => (
-            <li key={person.url}>{person.name}</li>
-          ))}
-        </ul>
+        <h1>Confirm</h1>
+        {this.props.location.state ? (
+          <div>
+            <h2>Please confirm:</h2>
+            <pre>{JSON.stringify(this.props.location.state, null, 2)}</pre>
+            <p>Now click the link to "confirm"</p>
+          </div>
+        ) : (
+          <div>
+            <p>No data, click the back button</p>
+          </div>
+        )}
       </div>
     )
   }
-}
+})
 
 render((
-  <Router createElement={asyncProps}>
-    <Route path="/" component={Main}>
+  <Router>
+    <Route path="/" component={App}>
       <IndexRoute component={Index}/>
-      <Route path="contacts" component={Contacts}>
-        <IndexRoute component={ContactsIndex}/>
-        <Route path=":contactId" component={Contact}/>
-      </Route>
-      <Route path="star-wars" component={StarWars}/>
+      <Route path="/form" component={Form}/>
+      <Route path="/confirm" component={Confirm}/>
     </Route>
   </Router>
 ), document.getElementById('app'))
