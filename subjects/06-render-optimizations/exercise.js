@@ -11,14 +11,14 @@ const { array, func, number } = React.PropTypes
 
 require('./styles')
 
-class ListView extends React.Component {
+const ListView = React.createClass({
 
-  static propTypes = {
+  propTypes: {
     items: array.isRequired,
     itemHeight: number.isRequired,
     availableHeight: number.isRequired,
     renderItem: func.isRequired
-  }
+  },
 
   render() {
     let { items, itemHeight, availableHeight, renderItem, style } = this.props
@@ -28,16 +28,14 @@ class ListView extends React.Component {
       <div style={{ ...style, height: '100%', overflowY: 'scroll' }}>
         <ol style={{ height: totalHeight }}>
         {items.map((item, index) =>
-          <li key={item.text}>
-          {renderItem(item)}
-          </li>
+          <li key={item.text}>{renderItem(item)}</li>
         )}
         </ol>
       </div>
     )
   }
  
-}
+})
 
 render(
   <RainbowList ListView={ListView} length={500} />,

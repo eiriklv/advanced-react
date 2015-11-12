@@ -11,28 +11,26 @@ const { array, func, number } = React.PropTypes
 
 require('./styles')
 
-class ListView extends React.Component {
+const ListView = React.createClass({
 
-  static propTypes = {
+  propTypes: {
     items: array.isRequired,
     itemHeight: number.isRequired,
     availableHeight: number.isRequired,
     renderItem: func.isRequired
-  }
+  },
 
-  constructor(props, context) {
-    super(props, context)
-
-    this.state = {
+  getInitialState() {
+    return {
       scrollTop: 0
     }
-  }
+  },
 
   handleScroll(e) {
     this.setState({
       scrollTop: e.target.scrollTop
     })
-  }
+  },
 
   render() {
     let { items, itemHeight, availableHeight, renderItem, style } = this.props
@@ -47,11 +45,9 @@ class ListView extends React.Component {
     return (
       <div style={{ ...style, height: '100%', overflowY: 'scroll' }} onScroll={(e) => this.handleScroll(e)}>
         <div style={{ height: totalHeight }}>
-          <ol style={{ paddingTop: (startIndex * itemHeight) }}>
+          <ol style={{ paddingTop: (startIndex * itemHeight), pointerEvents: 'none' }}>
           {items.slice(startIndex, endIndex).map((item, index) =>
-            <li key={item.text} style={{ pointerEvents: 'none' }}>
-            {renderItem(item)}
-            </li>
+            <li key={item.text}>{renderItem(item)}</li>
           )}
           </ol>
         </div>
@@ -59,7 +55,7 @@ class ListView extends React.Component {
     )
   }
  
-}
+})
 
 render(
   <RainbowList ListView={ListView} length={500000} />,
