@@ -1,3 +1,10 @@
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
 body {
   padding: 10px;
 }
@@ -30,4 +37,43 @@ body {
 }
 #switch3 {
   width: 350px;
+}
+
+
+
+
+
+.grid {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border: 1px solid #999;
+  border-width: 1px 1px 0 0;
+  width: 451px;
+  height: 451px;
+}
+.grid .cell {
+  border: 1px solid #999;
+  border-width: 0 0 1px 1px;
+  width: 150px;
+  height: 150px;
+  line-height: 150px;
+  text-align: center;
+  color: #aaa;
+  float: left;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.grid .marker, .grid .drop-hint {
+  position: absolute;
+  background: red;
+  width: 150;
+  height: 150;
+  opacity: 0.6;
+}
+.grid .drop-hint {
+  background: #999;
 }

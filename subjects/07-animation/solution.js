@@ -1,80 +1,132 @@
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // Exercise:
 //
-// - Use a <Spring> to animate the transition
-// - See https://github.com/chenglou/react-motion for docs
+// - Use a <Motion> to animate the transition of the red "marker" to its
+//   destination when it is dropped
 //
 // Got extra time?
 //
-// - Experiment with different stiffness/damping values (see https://github.com/chenglou/react-motion#spring-)
-// - Insert a few more switches (try using id #switch2 and #switch3) that use the same Spring to animate their values
+// - Add a "drop hint" element that indicates which element will receive
+//   the marker when it is dropped to improve usability
+// - Use a <StaggeredMotion> to give the marker animation a blur effect
 ////////////////////////////////////////////////////////////////////////////////
 import React from 'react'
-import { render } from 'react-dom'
-import { Spring } from 'react-motion'
+import { render, findDOMNode } from 'react-dom'
+import { Motion, spring } from 'react-motion'
 
 require('./styles')
 
-class ToggleSwitch extends React.Component {
+const MarkerGrid = React.createClass({
 
-  constructor(props, context) {
-    super(props, context)
-    this.state = {
-      isActive: false
+  getInitialState() {
+    return {
+      isDraggingMarker: false,
+      markerX: 0,
+      markerY: 0,
+      mouseX: 0,
+      mouseY: 0
     }
-  }
+  },
 
-  toggle() {
+  componentWillMount() {
+    document.addEventListener('mouseup', this.handleMouseUp)
+    document.addEventListener('mousemove', this.handleMouseMove)
+  },
+
+  componentWillUnmount() {
+    document.removeEventListener('mousemove', this.handleMouseMove)
+    document.removeEventListener('mouseup', this.handleMouseUp)
+  },
+
+  getRelativeXY({ clientX, clientY }) {
+    const { offsetLeft, offsetTop } = findDOMNode(this)
+    
+    return {
+      x: clientX - offsetLeft,
+      y: clientY - offsetTop
+    }
+  },
+
+  handleMouseDown(event) {
+    const { x, y } = this.getRelativeXY(event)
+    const { offsetLeft, offsetTop } = event.target
+
     this.setState({
-      isActive: !this.state.isActive
+      isDraggingMarker: true,
+      markerX: x - offsetLeft,
+      markerY: y - offsetTop,
+      mouseX: x,
+      mouseY: y
     })
-  }
 
-  handleClick() {
-    this.toggle()
-  }
-  
+    // Prevent Chrome from displaying a text cursor.
+    event.preventDefault()
+  },
+
+  handleMouseMove(event) {
+    if (this.state.isDraggingMarker) {
+      const { x, y } = this.getRelativeXY(event)
+
+      this.setState({
+        mouseX: x,
+        mouseY: y
+      })
+    }
+  },
+
+  handleMouseUp() {
+    if (this.state.isDraggingMarker)
+      this.setState({ isDraggingMarker: false })
+  },
+
   render() {
-    let { isActive } = this.state
-    let knob1Left = isActive ? 400 : 0
-    let knob2Left = isActive ? 600 : 0
-    let knob3Left = isActive ? 300 : 0
+    const { isDraggingMarker, markerX, markerY, mouseX, mouseY } = this.state
+
+    let markerLeft, markerTop, dropHint
+    if (isDraggingMarker) {
+      markerLeft = mouseX - markerX
+      markerTop = mouseY - markerY
+      dropHint = <div className="drop-hint" style={{
+        left: Math.floor(Math.max(0, Math.min(449, mouseX)) / 150) * 150,
+        top: Math.floor(Math.max(0, Math.min(449, mouseY)) / 150) * 150
+      }} />
+    } else {
+      markerLeft = Math.floor(Math.max(0, Math.min(449, mouseX)) / 150) * 150
+      markerTop = Math.floor(Math.max(0, Math.min(449, mouseY)) / 150) * 150
+    }
+
+    const markerStyle = {
+      left: markerLeft,
+      top: markerTop
+    }
 
     return (
-      <Spring endValue={{
-        knob1: { val: knob1Left, config: [ 150, 20 ] },
-        knob2: { val: knob2Left, config: [ 100, 9 ] },
-        knob3: { val: knob3Left }
-      }}>
-        {({ knob1, knob2, knob3 }) =>
-          <div>
-            <div id="switch1" className="toggle-switch" onClick={e => this.handleClick(e)}>
-              <div className="toggle-switch-knob" style={{
-                WebkitTransform: `translate3d(${knob1.val}px,0,0)`,
-                transform: `translate3d(${knob1.val}px,0,0)`
-              }} />
-            </div>
-            <div id="switch2" className="toggle-switch" onClick={e => this.handleClick(e)}>
-              <div className="toggle-switch-knob" style={{
-                WebkitTransform: `translate3d(${knob2.val}px,0,0)`,
-                transform: `translate3d(${knob2.val}px,0,0)`
-              }} />
-            </div>
-            <div id="switch3" className="toggle-switch" onClick={e => this.handleClick(e)}>
-              <div className="toggle-switch-knob" style={{
-                WebkitTransform: `translate3d(${knob3.val}px,0,0)`,
-                transform: `translate3d(${knob3.val}px,0,0)`
-              }} />
-            </div>
-          </div>
-        }
-      </Spring>
+      <div className="grid">
+        {dropHint}
+        <Motion
+          defaultStyle={markerStyle}
+          style={{
+            left: isDraggingMarker ? markerLeft : spring(markerLeft),
+            top: isDraggingMarker ? markerTop : spring(markerTop)
+          }}
+        >
+        {markerStyle => (
+          <div className="marker" style={markerStyle} onMouseDown={this.handleMouseDown} />
+        )}
+        </Motion>
+        <div className="cell">1</div>
+        <div className="cell">2</div>
+        <div className="cell">3</div>
+        <div className="cell">4</div>
+        <div className="cell">5</div>
+        <div className="cell">6</div>
+        <div className="cell">7</div>
+        <div className="cell">8</div>
+        <div className="cell">9</div>
+      </div>
     )
   }
 
-}
+})
 
-render(
-  <ToggleSwitch />,
-  document.getElementById('app')
-)
+render(<MarkerGrid />, document.getElementById('app'))
