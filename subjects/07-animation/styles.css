@@ -76,4 +76,5 @@ body {
 }
 .grid .drop-hint {
   background: #999;
+  opacity: 0.3;
 }
